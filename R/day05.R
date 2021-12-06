@@ -67,12 +67,38 @@
 #' least two lines overlap?*
 #'
 #' **Part Two**
+#' Unfortunately, considering only horizontal and vertical lines doesn\'t
+#' give you the full picture; you need to also consider *diagonal lines*.
 #'
-#' *(Use have to manually add this yourself.)*
+#' Because of the limits of the hydrothermal vent mapping system, the lines
+#' in your list will only ever be horizontal, vertical, or a diagonal line
+#' at exactly 45 degrees. In other words:
 #'
-#' *(Try using `convert_clipboard_html_to_roxygen_md()`)*
+#' -   An entry like `1,1 -> 3,3` covers points `1,1`, `2,2`, and `3,3`.
+#' -   An entry like `9,7 -> 7,9` covers points `9,7`, `8,8`, and `7,9`.
 #'
-#' @param x some data
+#' Considering all lines from the above example would now produce the
+#' following diagram:
+#'
+#'     1.1....11.
+#'     .111...2..
+#'     ..2.1.111.
+#'     ...1.2.2..
+#'     .112313211
+#'     ...1.2....
+#'     ..1...1...
+#'     .1.....1..
+#'     1.......1.
+#'     222111....
+#'
+#' You still need to determine *the number of points where at least two
+#' lines overlap*. In the above example, this is still anywhere in the
+#' diagram with a `2` or larger - now a total of `12` points.
+#'
+#' Consider all of the lines. *At how many points do at least two lines
+#' overlap?*
+#'
+#' @param x lines for plumes of sea vents
 #' @return For Part One, `f05a(x)` returns .... For Part Two,
 #'   `f05b(x)` returns ....
 #' @export
@@ -93,15 +119,15 @@ f05a <- function(x) {
 
   sea_floor = array(0, c(1000,1000))
 
-  for (j in nrow(plumes)) {
-    if (plumes$vert[[j]]) {
-      # loop through values between y1 and y2
+  for (j in 1:nrow(plumes)) {
+    if (plumes$vert[[j]] | plumes$hori[[j]]) {
 
-    } if (plumes$hori[[j]]) {
-      # loop through values between x1 and x2
-
+      sea_floor[plumes$x1[[j]]:plumes$x2[[j]], plumes$y1[[j]]:plumes$y2[[j]]] = 1 + sea_floor[plumes$x1[[j]]:plumes$x2[[j]], plumes$y1[[j]]:plumes$y2[[j]]]
     }
   }
+
+  # part one answer
+  sum(sea_floor > 1)
 }
 
 
