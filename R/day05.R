@@ -99,24 +99,18 @@
 #' overlap?*
 #'
 #' @param x lines for plumes of sea vents
-#' @return For Part One, `f05a(x)` returns .... For Part Two,
-#'   `f05b(x)` returns ....
+#' @return For Part One, `f05a(x)` returns number of overlapping plumes
+#' on horizontal and vertical alignments. For Part Two,
+#'   `f05b(x)` returns overlapping plumes on any alignment.
 #' @export
 #' @examples
 #' f05a(example_data_05())
 #' f05b()
 f05a <- function(x) {
 
-  plumes = tibble(init = x) %>%
-    separate(init, c("x1y1", "x2y2"), sep = " ->") %>%
-    separate(x1y1, c("x1", "y1"), sep = ",", convert = TRUE) %>%
-    separate(x2y2, c("x2", "y2"), sep = ",", convert = TRUE) %>%
-    mutate(vert = x1 == x2,
-           hori = y1 == y2)
+  plumes = create_plumes(x)
 
-  max_x = max(plumes$x1, plumes$x2)
-  max_y = max(plumes$y1, plumes$y2)
-
+  # range from 10 to 990
   sea_floor = array(0, c(1000,1000))
 
   for (j in 1:nrow(plumes)) {
@@ -134,12 +128,35 @@ f05a <- function(x) {
 #' @rdname day05
 #' @export
 f05b <- function(x) {
+  plumes = create_plumes(x)
 
+  sea_floor = array(0, c(1000,1000))
+
+  for (j in 1:nrow(plumes)) {
+    # sequences for x and y
+    xx = seq(plumes$x1[[j]], plumes$x2[[j]])
+    yy = seq(plumes$y1[[j]], plumes$y2[[j]])
+    # adjust for vert or horizontal
+    if (length(xx) == 1) xx = rep(xx, length(yy))
+    if (length(yy) == 1) yy = rep(yy, length(xx))
+    # loop for sea floor positions
+    for (k in seq_len(max(length(xx), length(yy)))) {
+        sea_floor[xx[k], yy[k]] = sea_floor[xx[k], yy[k]] + 1
+    }
+  }
+
+  # part one answer
+  sum(sea_floor > 1)
 }
 
 
-f05_helper <- function(x) {
-
+create_plumes <- function(x) {
+  tibble(init = x) %>%
+    separate(init, c("x1y1", "x2y2"), sep = " ->") %>%
+    separate(x1y1, c("x1", "y1"), sep = ",", convert = TRUE) %>%
+    separate(x2y2, c("x2", "y2"), sep = ",", convert = TRUE) %>%
+    mutate(vert = x1 == x2,
+           hori = y1 == y2)
 }
 
 
