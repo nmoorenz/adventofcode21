@@ -219,13 +219,23 @@ f08b <- function(x) {
     mutate(L2 = which(nchar(column) == 2))
 
 
+  segments = tibble(parts = x) %>%
+    separate(parts, into = c("nums", "digi"), sep = " \\| ") %>%
+    mutate(nums = str_split(nums, " "),
+           one = map_chr(nums, get_nums, 2),
+           seven = map_chr(nums, get_nums, 3),
+           four = map_chr(nums, get_nums, 4))
 
+  segments$nums[[1]][nchar(segments$nums[[1]]) == 2]
+  segments$nums[[1]][nchar(segments$nums[[1]]) == 3]
+  segments$nums[[1]][nchar(segments$nums[[1]]) == 4]
+  segments$nums[[1]][nchar(segments$nums[[1]]) == 7]
 
 }
 
 
-f08_helper <- function(x) {
-
+get_nums <- function(vct, cnt) {
+  vct[nchar(vct) == cnt]
 }
 
 
