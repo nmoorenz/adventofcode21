@@ -214,32 +214,53 @@ f08b <- function(x) {
   segments = tibble(parts = x) %>%
     separate(parts, into = c("nums", "digi"), sep = " \\| ") %>%
     mutate(nums = str_split(nums, " "),
-           digi = str_split(digi, " "),
-           one = map_chr(nums, get_nums, 2),
-           seven = map_chr(nums, get_nums, 3),
-           four = map_chr(nums, get_nums, 4),
-           e_ = map_chr(nums, get_cnt, 4),
-           b_ = map_chr(nums, get_cnt, 6),
-           f_ = map_chr(nums, get_cnt, 9),
-           a_ = map2_chr(seven, four, get_a),
-           d_ = pmap_chr(list(four, one, b_), get_d),
-           g_ = pmap_chr(list(one, seven, four, e_), get_g),
-           c_ = map2_chr(nums, a_, get_c),
-           zero = pmap_chr(list(a_, b_, c_, e_, f_, g_), do_six),
-           six = pmap_chr(list(a_, b_, d_, e_, f_, g_), do_six),
-           nine = pmap_chr(list(a_, b_, c_, d_, f_, g_), do_six),
-           two = pmap_chr(list(a_, c_, d_, e_, g_), do_five),
-           three = pmap_chr(list(a_, c_, d_, f_, g_), do_five),
-           five = pmap_chr(list(a_, b_, d_, f_, g_), do_five),
-           eight = map_chr(8, get_eight),
-    )
+           n_1 = map(nums, get_nums, 2),
+           n_7 = map(nums, get_nums, 3),
+           n_4 = map(nums, get_nums, 4),
+           e_ = map(nums, get_cnt, 4),
+           b_ = map(nums, get_cnt, 6),
+           f_ = map(nums, get_cnt, 9),
+           a_ = map2(n_7, n_4, get_a),
+           d_ = pmap(list(n_4, n_1, b_), get_d),
+           g_ = pmap(list(n_1, n_7, n_4, e_), get_g),
+           c_ = map2(nums, a_, get_c),
+           n_0 = pmap(list(a_, b_, c_, e_, f_, g_), do_six),
+           n_6 = pmap(list(a_, b_, d_, e_, f_, g_), do_six),
+           n_9 = pmap(list(a_, b_, c_, d_, f_, g_), do_six),
+           n_2 = pmap(list(a_, c_, d_, e_, g_), do_five),
+           n_3 = pmap(list(a_, c_, d_, f_, g_), do_five),
+           n_5 = pmap(list(a_, b_, d_, f_, g_), do_five),
+           n_8 = map(8, get_eight),
+           rr = row_number()
+          ) %>%
+    pivot_longer(starts_with("n_")) %>%
+    rowwise() %>%
+    mutate(value = paste0(value, collapse = "")) %>%
+    select(!ends_with("_"), -digi, -nums)
 
 
+  digits = tibble(parts = x) %>%
+    separate(parts, into = c("nums", "digi"), sep = " \\| ") %>%
+    mutate(digi = str_split(digi, " "),
+           digis = map(digi, get_digi),
+           rr = row_number()) %>%
+    unnest_wider(digis, names_sep = "_") %>%
+    pivot_longer(starts_with("digis_")) %>%
+    rowwise() %>%
+    mutate(value = paste0(value, collapse = "")) %>%
+    select(-nums, -digi)
+
+  results = inner_join(digits, segments, by = c("rr", "value")) %>%
+    mutate(nums = parse_number(name.y)) %>%
+    pivot_wider(id_cols = rr, names_from = name.x, values_from = nums) %>%
+    rowwise() %>%
+    mutate(val = as.integer(paste0(c(digis_1, digis_2, digis_3, digis_4), collapse = "")))
+
+  part_two = sum(results$val)
 }
 
 get_nums <- function(vct, cnt) {
-  mid = vct[nchar(vct) == cnt]
-  sort_word(mid)
+  paste0(sort(unlist(strsplit(vct[nchar(vct) == cnt], ""))), collapse = "")
 }
 
 get_cnt <- function(vct, cnt) {
@@ -265,21 +286,19 @@ get_c <- function(nn, aa) {
 }
 
 do_six <- function(z1, z2, z3, z4, z5, z6) {
-  mid = sort(c(z1, z2, z3, z4, z5, z6))
-  paste0(mid, collapse = "")
+  paste0(sort(c(z1, z2, z3, z4, z5, z6)), collapse = "")
 }
 
 do_five <- function(z1, z2, z3, z4, z5) {
-  mid = sort(c(z1, z2, z3, z4, z5))
-  paste0(mid, collapse = "")
+  paste0(sort(c(z1, z2, z3, z4, z5)), collapse = "")
 }
 
 get_eight <- function(xx) {
-  paste0(letters[1:7], collapse = TRUE)
+  paste0(letters[1:7], collapse = "")
 }
 
-sort_word <- function(xx) {
-  paste0(sort(unlist(strsplit(xx, ""))), collapse = "")
+get_digi <- function(dd) {
+  lapply(strsplit(dd, ""), sort)
 }
 
 #' @param example Which example data to use (by position or name). Defaults to
