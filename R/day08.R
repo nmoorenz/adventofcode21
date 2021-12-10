@@ -210,34 +210,77 @@ f08a <- function(x) {
 #' @rdname day08
 #' @export
 f08b <- function(x) {
-  # split pieces by pipe
-  # pipe is a character delimiter, need to escape
-  segments = tibble(parts = x) %>%
-    separate(parts, into = c("nums", "digi"), sep = " \\| ") %>%
-    separate(nums, into = c("1L","2L","3L","4L","5L","6L","7L","8L","9L","10L")) %>%
-    rowwise() %>%
-    mutate(L2 = which(nchar(column) == 2))
-
-
+  # so much mutate
   segments = tibble(parts = x) %>%
     separate(parts, into = c("nums", "digi"), sep = " \\| ") %>%
     mutate(nums = str_split(nums, " "),
+           digi = str_split(digi, " "),
            one = map_chr(nums, get_nums, 2),
            seven = map_chr(nums, get_nums, 3),
-           four = map_chr(nums, get_nums, 4))
+           four = map_chr(nums, get_nums, 4),
+           e_ = map_chr(nums, get_cnt, 4),
+           b_ = map_chr(nums, get_cnt, 6),
+           f_ = map_chr(nums, get_cnt, 9),
+           a_ = map2_chr(seven, four, get_a),
+           d_ = pmap_chr(list(four, one, b_), get_d),
+           g_ = pmap_chr(list(one, seven, four, e_), get_g),
+           c_ = map2_chr(nums, a_, get_c),
+           zero = pmap_chr(list(a_, b_, c_, e_, f_, g_), do_six),
+           six = pmap_chr(list(a_, b_, d_, e_, f_, g_), do_six),
+           nine = pmap_chr(list(a_, b_, c_, d_, f_, g_), do_six),
+           two = pmap_chr(list(a_, c_, d_, e_, g_), do_five),
+           three = pmap_chr(list(a_, c_, d_, f_, g_), do_five),
+           five = pmap_chr(list(a_, b_, d_, f_, g_), do_five),
+           eight = map_chr(8, get_eight),
+    )
 
-  segments$nums[[1]][nchar(segments$nums[[1]]) == 2]
-  segments$nums[[1]][nchar(segments$nums[[1]]) == 3]
-  segments$nums[[1]][nchar(segments$nums[[1]]) == 4]
-  segments$nums[[1]][nchar(segments$nums[[1]]) == 7]
 
 }
-
 
 get_nums <- function(vct, cnt) {
-  vct[nchar(vct) == cnt]
+  mid = vct[nchar(vct) == cnt]
+  sort_word(mid)
 }
 
+get_cnt <- function(vct, cnt) {
+  letters[1:7][str_count(paste0(vct, collapse = ""), letters[1:7]) == cnt]
+}
+
+get_a <- function(v1, v2) {
+  setdiff(unlist(strsplit(v1, "")), unlist(strsplit(v2, "")))
+}
+
+get_d <- function(four, one, b) {
+  setdiff(setdiff(unlist(strsplit(four, "")), unlist(strsplit(one, ""))), b)
+}
+
+get_g <- function(one, seven, four, e) {
+  mid = union(union(unlist(strsplit(one, "")), unlist(strsplit(seven, ""))), unlist(strsplit(four, "")))
+  setdiff(setdiff(letters[1:7], mid), e)
+}
+
+get_c <- function(nn, aa) {
+  dub = get_cnt(nn, 8)
+  setdiff(dub, aa)
+}
+
+do_six <- function(z1, z2, z3, z4, z5, z6) {
+  mid = sort(c(z1, z2, z3, z4, z5, z6))
+  paste0(mid, collapse = "")
+}
+
+do_five <- function(z1, z2, z3, z4, z5) {
+  mid = sort(c(z1, z2, z3, z4, z5))
+  paste0(mid, collapse = "")
+}
+
+get_eight <- function(xx) {
+  paste0(letters[1:7], collapse = TRUE)
+}
+
+sort_word <- function(xx) {
+  paste0(sort(unlist(strsplit(xx, ""))), collapse = "")
+}
 
 #' @param example Which example data to use (by position or name). Defaults to
 #'   1.
