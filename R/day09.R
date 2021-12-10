@@ -139,26 +139,38 @@ f09b <- function(x) {
 
   basin_num = 0
 
-  for (i in seq(2, cave_width+1)) {
-    for (j in seq(2, cave_length+1)) {
-      surr = c(basin_t[i-1,j], basin_t[i+1,j], basin_t[i,j-1], basin_t[i,j+1])
-      if (smokes[i,j] == 9) {
-        # if it is a 9 do nothing, keep as NA
+  for (k in seq(40)) {
+    for (i in seq(2, cave_width+1)) {
+      for (j in seq(2, cave_length+1)) {
+        surr = c(basin_t[i-1,j], basin_t[i+1,j], basin_t[i,j-1], basin_t[i,j+1])
+        if (smokes[i,j] == 9) {
+          # if it is a 9 do nothing, keep as NA
 
-      } else if (any(surr[!is.na(surr)])) {
-        # if there is a basin number in any surrounding spot, adopt that number
-        basin_t[i,j] = max(surr[!is.na(surr)])
+        } else if (any(surr[!is.na(surr)])) {
+          # if there is a basin number in any surrounding spot, adopt that number
+          basin_t[i,j] = min(surr[!is.na(surr)])
 
-      } else {
-        # if we find no surrounding basin number,
-        # add one to the basin and start a new basin counter
-        basin_num = basin_num + 1
-        basin_t[i,j] = basin_num
+        } else {
+          # if we find no surrounding basin number,
+          # add one to the basin and start a new basin counter
+          basin_num = basin_num + 1
+          basin_t[i,j] = basin_num
 
+        }
       }
     }
   }
 
+  basin_count = basin_t %>%
+    as.data.frame() %>%
+    mutate(rr = row_number()) %>%
+    pivot_longer(-rr, "cols") %>%
+    mutate(cols = parse_number(cols)) %>%
+    count(value) %>%
+    arrange(desc(n))
+
+  # part two answer
+  prod(basin_count$n[2:4])
 }
 
 
