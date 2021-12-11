@@ -1,4 +1,6 @@
 library(adventofcode21)
+library(tidyverse)
+
 x <- readLines("./inst/input10.txt")
 
 p1 <- f10a(x)
