@@ -344,25 +344,109 @@
 #' f11a(example_data_11())
 #' f11b()
 f11a <- function(x) {
-  # matrix, I think
-  octo = stringr::str_split_fixed(x, "", 10) %>% as.data.frame()
-  octo = sapply(octo, as.numeric)
+  # array, I think
+  octo_s = stringr::str_split_fixed(x, "", 10) %>% as.data.frame()
+  octo_s = sapply(octo_s, as.numeric)
 
+  octo = array(NA, c(12, 12))
+  octo[2:11, 2:11] = octo_s
+  # keep track of how many flashes there have been
+  counter = 0
+
+  # loop through 100 times
+  # is part two going to be a million times?
   for (j in seq(100)) {
-    octo = octo +1
+    print(paste("iteration: ", j))
+    # add one to the array
+    octo = octo + 1
+    # are any octopi going to flash?
+    flash = which(octo > 9)
+    # if none flash, go to next iteration
+    if (!any(flash, na.rm = TRUE)) next
+
+    # keep track of which have already flashed
+    new_flash = vector()
+    old_flash = vector()
+    # if we do have some flashing
+    repeat {
+      # new flash, iterate these ones
+      new_flash = setdiff(flash, old_flash)
+      # allocate to keep track
+      old_flash = flash
+      # this function takes care of iteration
+      octo = increment_octo(octo, new_flash)
+      # get a new list of flashers
+      flash = which(octo > 9)
+      # break the repeat if we aren't flashing any more
+      # length might not be the best test but we can only add so it's ok?
+      if (length(flash) == length(old_flash)) break
+    }
+    octo[octo > 9] = 0
+    counter = counter + length(flash)
+    print(paste("length of flashes: ", length(flash)))
+
   }
+}
+
+increment_octo <- function(arr, vct) {
+  for (j in seq(2, 11)) {
+    for (k in seq(2, 11)) {
+      pos = (k - 1) * 12 + j
+      if (arr[j, k] > 9 & pos %in% vct) {
+        print(pos)
+        arr[(j-1):(j+1), (k-1):(k+1)] = arr[(j-1):(j+1), (k-1):(k+1)] + 1
+      }
+    }
+  }
+  return(arr)
 }
 
 
 #' @rdname day11
 #' @export
 f11b <- function(x) {
+  # array, I think
+  octo_s = stringr::str_split_fixed(x, "", 10) %>% as.data.frame()
+  octo_s = sapply(octo_s, as.numeric)
 
-}
+  octo = array(NA, c(12, 12))
+  octo[2:11, 2:11] = octo_s
+  # keep track of how many flashes there have been
+  counter = 0
 
+  # loop through 100 times
+  # is part two going to be a million times?
+  for (j in seq(1000)) {
+    print(paste("iteration: ", j))
+    # add one to the array
+    octo = octo + 1
+    # are any octopi going to flash?
+    flash = which(octo > 9)
+    # if none flash, go to next iteration
+    if (!any(flash, na.rm = TRUE)) next
 
-f11_helper <- function(x) {
-
+    # keep track of which have already flashed
+    new_flash = vector()
+    old_flash = vector()
+    # if we do have some flashing
+    repeat {
+      # new flash, iterate these ones
+      new_flash = setdiff(flash, old_flash)
+      # allocate to keep track
+      old_flash = flash
+      # this function takes care of iteration
+      octo = increment_octo(octo, new_flash)
+      # get a new list of flashers
+      flash = which(octo > 9)
+      # break the repeat if we aren't flashing any more
+      # length might not be the best test but we can only add so it's ok?
+      if (length(flash) == length(old_flash)) break
+    }
+    octo[octo > 9] = 0
+    counter = counter + length(flash)
+    print(paste("length of flashes: ", length(flash)))
+    if (length(flash) == 100) break
+  }
 }
 
 
