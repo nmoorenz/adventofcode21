@@ -331,14 +331,58 @@
 #' simulate 100 steps. *How many total flashes are there after 100 steps?*
 #'
 #' **Part Two**
+#' It seems like the individual flashes aren\'t bright enough to navigate.
+#' However, you might have a better option: the flashes seem to be
+#' *synchronizing*!
 #'
-#' *(Use have to manually add this yourself.)*
+#' In the example above, the first time all octopuses flash simultaneously
+#' is step `195`:
 #'
-#' *(Try using `convert_clipboard_html_to_roxygen_md()`)*
+#'     After step 193:
+#'     5877777777
+#'     8877777777
+#'     7777777777
+#'     7777777777
+#'     7777777777
+#'     7777777777
+#'     7777777777
+#'     7777777777
+#'     7777777777
+#'     7777777777
 #'
-#' @param x some data
-#' @return For Part One, `f11a(x)` returns .... For Part Two,
-#'   `f11b(x)` returns ....
+#'     After step 194:
+#'     6988888888
+#'     9988888888
+#'     8888888888
+#'     8888888888
+#'     8888888888
+#'     8888888888
+#'     8888888888
+#'     8888888888
+#'     8888888888
+#'     8888888888
+#'
+#'     After step 195:
+#'     0000000000
+#'     0000000000
+#'     0000000000
+#'     0000000000
+#'     0000000000
+#'     0000000000
+#'     0000000000
+#'     0000000000
+#'     0000000000
+#'     0000000000
+#'
+#' If you can calculate the exact moments when the octopuses will all flash
+#' simultaneously, you should be able to navigate through the cavern. *What
+#' is the first step during which all octopuses flash?*
+#'
+#' @param x location and energy level of 100 octopus
+#' @return For Part One, `f11a(x)` returns how many flashes after 100 rounds
+#' of activation.  For Part Two, `f11b(x)` returns the first round where all
+#' octopus flash together.
+#'
 #' @export
 #' @examples
 #' f11a(example_data_11())
