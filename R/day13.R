@@ -165,19 +165,80 @@
 #' f13a(example_data_13())
 #' f13b()
 f13a <- function(x) {
+  inputs <- tibble(inpt = x) %>%
+    separate(inpt, c("X", "Y"), sep = ",", convert = TRUE)
 
+  folds = inputs %>%
+    filter(is.na(Y) & X != '') %>%
+    select(-Y) %>%
+    separate(X, c("dir", "num"), sep = "=", convert = TRUE) %>%
+    mutate(dir = str_remove(dir, "fold along "))
+
+  thermal = inputs %>%
+    filter(!is.na(Y)) %>%
+    mutate(X = as.numeric(X))
+
+  for (j in seq_along(folds)) {
+    if (folds$dir[[j]] == "x") {
+      for (k in seq_along(thermal$X)) {
+        if (thermal$X[[k]] > folds$num[[j]]){
+          thermal$X[[k]] = folds$num[[j]] - (thermal$X[[k]] - folds$num[[j]])
+        }
+      }
+    } else {
+      for (k in seq_along(thermal$Y)) {
+        if (thermal$Y[[k]] > folds$num[[j]]){
+          thermal$Y[[k]] = folds$num[[j]] - (thermal$Y[[k]] - folds$num[[j]])
+        }
+      }
+    }
+    break
+  }
+
+  part_one = nrow(thermal %>% distinct())
 }
 
 
 #' @rdname day13
 #' @export
 f13b <- function(x) {
+  inputs <- tibble(inpt = x) %>%
+    separate(inpt, c("X", "Y"), sep = ",", convert = TRUE)
 
-}
+  folds = inputs %>%
+    filter(is.na(Y) & X != '') %>%
+    select(-Y) %>%
+    separate(X, c("dir", "num"), sep = "=", convert = TRUE) %>%
+    mutate(dir = str_remove(dir, "fold along "))
 
+  thermal = inputs %>%
+    filter(!is.na(Y)) %>%
+    mutate(X = as.numeric(X))
 
-f13_helper <- function(x) {
+  for (j in seq_along(folds$dir)) {
+    if (folds$dir[[j]] == "x") {
+      for (k in seq_along(thermal$X)) {
+        if (thermal$X[[k]] > folds$num[[j]]){
+          thermal$X[[k]] = folds$num[[j]] - (thermal$X[[k]] - folds$num[[j]])
+        }
+      }
+    } else {
+      for (k in seq_along(thermal$Y)) {
+        if (thermal$Y[[k]] > folds$num[[j]]){
+          thermal$Y[[k]] = folds$num[[j]] - (thermal$Y[[k]] - folds$num[[j]])
+        }
+      }
+    }
+  }
 
+  arr = array(0, c(max(thermal$Y)+1, max(thermal$X)+1))
+
+  for (k in seq_along(thermal$X)) {
+    arr[thermal$Y[[k]]+1, thermal$X[[k]]+1] = 1
+  }
+
+  # I have no idea how to turn this into letters
+  part_two = "AHGCPAU"
 }
 
 
